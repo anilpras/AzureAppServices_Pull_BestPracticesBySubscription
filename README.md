@@ -3,7 +3,7 @@
 
 dos2unix RecommendationBestPractices.sh  (you may need to use this or may not be )
 
-./RecommendationBestPractices.sh "<pass_subscription_id>"
+./appservices.sh "<pass_subscription_id>"
 
 # App Services Best Practices Script
 
