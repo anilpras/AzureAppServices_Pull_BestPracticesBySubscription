@@ -14,7 +14,7 @@ _subscriptionId="$1"
 # _subscriptionId=""
 
 # HTML output file
-html_output="AppServicesRecommdentionaBeta_opt3.html"
+html_output="AppServicesRecommdentionaBeta.html"
 
 # Main Execution Flow and function calls
 
