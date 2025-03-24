@@ -37,17 +37,5 @@ This Bash script retrieves and displays App Service and App Service Plan configu
 
 The script outputs tables that include the following information:
 
-- **App Service Configuration** (Auto Heal, Health Check, Always On status)
-- **App Service Plan Configuration** (Tier, Size, Worker Capacity, and App Count)
-- **Recommendations** for App Service Plan density and cost optimization
+![image](https://github.com/user-attachments/assets/dbba7f39-efb8-44d2-a441-2ee77d195282)
 
-```bash
---------------------------------------------------------------
-App Service Name              | Auto Heal    | Health Check | Always On
---------------------------------------------------------------
-my-web-app-1                  | ENABLED      | ENABLED      | DISABLED
-my-web-app-2                  | DISABLED     | DISABLED     | ENABLED
---------------------------------------------------------------
-
---------------------------------------------------------------
-App Service Plan              | Size         | Tier         | Recommended Apps Count |
