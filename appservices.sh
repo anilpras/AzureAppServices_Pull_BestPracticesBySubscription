@@ -644,4 +644,4 @@ generate_best_practices_reference &    # Run in background
 show_spinner_with_progress $! "Generating Best Practices References" $current_stage $total_stages
 
 # Completion message
-echo -e "\n🎉 App Service configuration report generated successfully!"
+echo -e "\n🎉 App Service configuration report generated successfully in $html_output !"
