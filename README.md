@@ -1,0 +1,1 @@
+# AzureAppServices_Pull_BestPracticesBySubscription
