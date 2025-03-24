@@ -1,7 +1,7 @@
 
 # How to run
 
-dos2unix RecommendationBestPractices.sh  (you may need to use this or may not be )
+dos2unix appservices.sh  (you may need to use this or may not be )
 
 ./appservices.sh "<pass_subscription_id>"
 
