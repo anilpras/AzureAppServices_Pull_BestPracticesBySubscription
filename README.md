@@ -37,5 +37,6 @@ This Bash script retrieves and displays App Service and App Service Plan configu
 
 The script outputs tables that include the following information:
 
-![image](https://github.com/user-attachments/assets/dbba7f39-efb8-44d2-a441-2ee77d195282)
+![image](https://github.com/user-attachments/assets/ad402659-b37e-4c3b-8f30-6c263b3fc55b)
+
 
