@@ -1,6 +1,7 @@
 
 # How to run
 
+chmod +x appservices.sh
 dos2unix appservices.sh  (you may need to use this or may not be )
 
 ./appservices.sh "<pass_subscription_id>"
