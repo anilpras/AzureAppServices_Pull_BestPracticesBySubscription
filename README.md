@@ -16,6 +16,11 @@ STEP#5 --> download the generated file in this case it is **AppServicesRecommden
 
 ![image](https://github.com/user-attachments/assets/be024096-88e3-420a-bbe7-05292c9601a6)
 
+## Example Output
+
+The script outputs tables that include the following information:
+
+![image](https://github.com/user-attachments/assets/e649d4bd-81df-4a8d-9fdd-94e69ac52e56)
 
 # App Services Best Practices Script
 
@@ -45,10 +50,6 @@ This Bash script retrieves and displays App Service and App Service Plan configu
 2. Set the `_subscriptionId` variable to the desired Azure subscription ID.
 3. Run the script to retrieve configurations and recommendations for your App Services and App Service Plans.
 
-## Example Output
 
-The script outputs tables that include the following information:
-
-![image](https://github.com/user-attachments/assets/ad402659-b37e-4c3b-8f30-6c263b3fc55b)
 
 
