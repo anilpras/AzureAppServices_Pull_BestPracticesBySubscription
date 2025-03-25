@@ -9,7 +9,7 @@ STEP#2 --> chmod +x script.sh
 
 STEP#3 --> dos2unix script.sh  (you may need to use this or may not be )
 
-STEP#4 --> ./appservices.sh "<pass_subscription_id>"
+STEP#4 --> ./script.sh "<pass_subscription_id>"
 
 STEP#5 --> download the generated file in this case it is AppServicesRecommdentionaBeta.html
 
