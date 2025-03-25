@@ -10,14 +10,16 @@ fi
 # Assigning the subscription ID from the first argument
 _subscriptionId="$1"
 
+# az login
+# az account set --subscription "$1"
+
 # # Subscription ID and other variables
-# _subscriptionId=""
+# _subscriptionId="ad265e87-5b4c-4c3c-b490-939e5907c6a5"
 
 # HTML output file
 html_output="AppServicesRecommdentionaBeta.html"
 
 # Main Execution Flow and function calls
-
 
 # ====================================================================================
 # Region: Fetch App Services Plan Configuration to build recommendations.
@@ -52,12 +54,12 @@ generate_App_Services_Recommendations() {
         # Fetch all required properties in a single API call
         config_json=$(az webapp config show --subscription "$_subscriptionId" --resource-group "$_resourceGroup" --name "$_name" --query "{autoHealEnabled:autoHealEnabled, healthCheckPath:healthCheckPath, alwaysOn:alwaysOn, minTlsVersion:minTlsVersion, ftpsState:ftpsState}" --output json)
 
-        # Extract properties from JSON response
         _autoHealEnabled=$(echo "$config_json" | jq -r '.autoHealEnabled' | grep -q "true" && echo "ENABLED" || echo "DISABLED")
-        _healthCheckPath=$(echo "$config_json" | jq -r '.healthCheckPath' | grep -q . && echo "ENABLED" || echo "DISABLED")
-        _alwaysOn=$(echo "$config_json" | jq -r '.alwaysOn' | grep -q "true" && echo "ENABLED" || echo "DISABLED")
+        _healthCheckPath=$(echo "$config_json" | jq -r '.healthCheckPath // empty' | grep -q . && echo "ENABLED" || echo "DISABLED")
+        _alwaysOn=$(echo "$config_json" | jq -r '.alwaysOn' | grep -q "^true$" && echo "ENABLED" || echo "DISABLED")
         _minTlsVersion=$(echo "$config_json" | jq -r '.minTlsVersion')
         _ftpsState=$(echo "$config_json" | jq -r '.ftpsState')
+    
 
         # Color formatting based on conditions
         if [[ "$_autoHealEnabled" == "ENABLED" ]]; then
@@ -264,8 +266,6 @@ red_i="\e[31m"
 yellow_i="\e[33m"
 reset="\e[0m"
 
-
-
 # Symbols
 # tick=" ( ✔ ) "
 # recomm=""
@@ -278,7 +278,6 @@ recomm=""
 cross=""
 urgent_warning=""
 critical_warning=""
-
 
 initialize_html() {
     cat <<EOF >$html_output
@@ -432,7 +431,6 @@ EOF
 # EOF
 # }
 
-
 summary_table() {
 
     cat <<EOF >>$html_output
@@ -560,12 +558,9 @@ generate_best_practices_reference() {
 EOF
 }
 
-
 # ====================================================================================
 # Region: Main Execution Flow and function calls
 #====================================================================================
-
-
 
 # initialize_html
 # generate_summary
@@ -577,13 +572,13 @@ EOF
 # echo -e "🎉 App Service configuration report generated successfully in $html_output"
 
 # Define Colors for Output
-LIGHT_CYAN="\033[1;36m"           # Light Cyan for spinner animation
-LIGHT_BLUE="\033[1;34m"           # Light Blue for stage name
-LIGHT_PURPLE="\033[1;35m"         # Light Purple for filename
-LIGHT_GREEN="\033[1;32m"          # Light Green for progress percentage
-LIGHT_YELLOW="\033[1;93m"         # Light Yellow for completion status
-WHITE="\033[1;97m"                # White for other text
-RESET="\033[0m"                   # Reset color
+LIGHT_CYAN="\033[1;36m"   # Light Cyan for spinner animation
+LIGHT_BLUE="\033[1;34m"   # Light Blue for stage name
+LIGHT_PURPLE="\033[1;35m" # Light Purple for filename
+LIGHT_GREEN="\033[1;32m"  # Light Green for progress percentage
+LIGHT_YELLOW="\033[1;93m" # Light Yellow for completion status
+WHITE="\033[1;97m"        # White for other text
+RESET="\033[0m"           # Reset color
 
 # Function to show the spinner with progress and stage name
 show_spinner_with_progress() {
@@ -592,15 +587,18 @@ show_spinner_with_progress() {
     local current_stage=$3
     local total_stages=$4
     local delay=0.1
-    local spin='-\|/'
-
-    local percent=$(( (current_stage * 100) / total_stages ))
+    local spin='⠋⠙⠚⠛⠛⠓⠒⠂'
+    local progress=".........."
+    
+    local percent=$(((current_stage * 100) / total_stages))
 
     # Display the spinner with proper alignment
     while ps -p $pid &>/dev/null; do
         for i in $(seq 0 3); do
             # Clear the line and align output properly
-            echo -ne "\r${LIGHT_CYAN}${spin:$i:1}${RESET} ${LIGHT_BLUE}[Stage $current_stage/$total_stages] ${LIGHT_PURPLE}${stage_name}${RESET}... ${LIGHT_GREEN}$percent%${RESET} completed"
+            # echo -ne "\r${LIGHT_CYAN}${spin:$i:1}${RESET} ${LIGHT_BLUE}[Stage $current_stage/$total_stages] ${LIGHT_PURPLE}${stage_name}${RESET}... ${LIGHT_GREEN}$percent%${RESET} completed"
+            echo -ne "\r ${LIGHT_CYAN} Preparing Report ${LIGHT_CYAN}${spin:$i:2}${LIGHT_CYAN}${spin:$i:3}${LIGHT_CYAN}${spin:$i:4}${LIGHT_CYAN}${spin:$i:4}${LIGHT_CYAN} ${RESET} "
+         
             sleep $delay
         done
     done
@@ -615,33 +613,33 @@ current_stage=0
 
 # Stage 1: Initialize HTML
 current_stage=$((current_stage + 1))
-initialize_html &    # Run in background
+initialize_html &# Run in background
 show_spinner_with_progress $! "Initializing HTML" $current_stage $total_stages
 
 # Stage 2: Generate Summary
 current_stage=$((current_stage + 1))
-generate_summary &    # Run in background
+generate_summary &# Run in background
 show_spinner_with_progress $! "Generating Summary" $current_stage $total_stages
 
 # Stage 3: Generate App Service Recommendations
 current_stage=$((current_stage + 1))
-generate_App_Services_Recommendations &    # Run in background
+generate_App_Services_Recommendations &# Run in background
 show_spinner_with_progress $! "Generating App Service Recommendations" $current_stage $total_stages
 
 # Stage 4: Generate App Service Plan Recommendations
 current_stage=$((current_stage + 1))
-generate_app_service_plan_recommendations &    # Run in background
+generate_app_service_plan_recommendations &# Run in background
 show_spinner_with_progress $! "Generating App Service Plan Recommendations" $current_stage $total_stages
 
 # Stage 5: Finalize HTML
 current_stage=$((current_stage + 1))
-finalize_html &    # Run in background
+finalize_html &# Run in background
 show_spinner_with_progress $! "Finalizing HTML" $current_stage $total_stages
 
 # Stage 6: Generate Best Practices References
 current_stage=$((current_stage + 1))
-generate_best_practices_reference &    # Run in background
+generate_best_practices_reference &# Run in background
 show_spinner_with_progress $! "Generating Best Practices References" $current_stage $total_stages
 
 # Completion message
-echo -e "\n🎉 App Service configuration report generated successfully in $html_output !"
+echo -e "\n🎉 App Service configuration report generated successfully! Download the report file, name: $html_output"
