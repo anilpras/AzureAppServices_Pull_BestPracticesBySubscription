@@ -1,6 +1,5 @@
 #!/bin/bash
 
-
 # Ensure a subscription ID is passed
 if [ -z "$1" ]; then
     echo "Usage: $0 <Enter Subscription_Id>"
@@ -59,7 +58,6 @@ generate_App_Services_Recommendations() {
         _alwaysOn=$(echo "$config_json" | jq -r '.alwaysOn' | grep -q "^true$" && echo "ENABLED" || echo "DISABLED")
         _minTlsVersion=$(echo "$config_json" | jq -r '.minTlsVersion')
         _ftpsState=$(echo "$config_json" | jq -r '.ftpsState')
-    
 
         # Color formatting based on conditions
         if [[ "$_autoHealEnabled" == "ENABLED" ]]; then
@@ -143,18 +141,13 @@ generate_app_service_plan_recommendations() {
 
     while IFS=$'\t' read -r name resource_group zoneEnabled; do
         webapp_count=$(az webapp list --subscription $_subscriptionId --query "[?appServicePlanId=='/subscriptions/$_subscriptionId/resourceGroups/$resource_group/providers/Microsoft.Web/serverfarms/$name'] | length(@)" -o tsv)
+        az webapp list --subscription c5efbe49-8037-4fd2-881f-daf1e40b94ac --query "[?appServicePlanId=='/subscriptions/c5efbe49-8037-4fd2-881f-daf1e40b94ac/resourceGroups/PowerBIRG/providers/Microsoft.Web/serverfarms/ASP-PowerBIRG-ab69'] | length(@)"
+
         webapp_info=$(az appservice plan show --name $name --subscription $_subscriptionId --resource-group $resource_group --query "{tier:sku.tier, size:sku.name, workers:sku.capacity}" --output json)
 
         webapp_worker=$(echo "$webapp_info" | jq -r '.workers')
         webapp_size=$(echo "$webapp_info" | jq -r '.size')
         webapp_tier=$(echo "$webapp_info" | jq -r '.tier')
-
-        # Set color based on the number of web apps
-        if [ "$webapp_count" -gt 1 ]; then
-            HighCount="<span style='color: orange;'>$webapp_count</span>"
-        else
-            HighCount="$webapp_count"
-        fi
 
         # Determine the recommended number of apps based on the plan size
         if [[ "$webapp_size" =~ ^(B1|S1|P1v2|I1v1|P0v3|P1)$ ]]; then
@@ -187,8 +180,11 @@ generate_app_service_plan_recommendations() {
             if [ "$webapp_count" -gt 64 ]; then
                 webapp_count="<span style='color: #FF4C4C;font-weight: bold;'> $webapp_count ( Beyond Recommended limit )</span>"
             fi
-        elif [[ "$webapp_size" =~ ^(EP1)$ ]]; then
+        elif [[ "$webapp_size" =~ ^(EP1|Y1)$ ]]; then
             recommended_apps="N/A"
+        elif [[ "$webapp_size" =~ ^(Y1)$ ]]; then
+            recommended_apps="N/A"
+            webapp_count="N/A"
         fi
 
         # Zone redundancy
@@ -202,14 +198,18 @@ generate_app_service_plan_recommendations() {
 
         # Density recommendation section if no apps in service plan
         if [ "$webapp_count" -eq 0 ]; then
-            webapp_count="<span style='color: #FF4C4C;font-weight: bold;'> $webapp_count ( EMPTY PLAN - Review and Delete )</span>"
+            if [[ "$webapp_size" =~ ^(Y1)$ ]]; then
+                webapp_count="N/A"
+            else
+                webapp_count="<span style='color: #FF4C4C;font-weight: bold;'>Server farm: $webapp_count ( EMPTY PLAN - Review and Delete )</span>"
+            fi
         fi
 
         # Density recommendation section if no apps in service plan
         if [ "$webapp_worker" -eq 1 ]; then
 
             if [[ "$webapp_size" =~ ^(B1|B2|B3|D1|F1)$ ]]; then
-                webapp_worker=""
+                webapp_worker="<span style='color: #90EE90;'>$webapp_worker</span>"
             else
                 webapp_worker="<span style='color: #FF4C4C;font-weight: bold;'> $webapp_worker ( PROD ENV - Recommended >= 2 Instances ) </span>"
             fi
@@ -589,7 +589,7 @@ show_spinner_with_progress() {
     local delay=0.1
     local spin='⠋⠙⠚⠛⠛⠓⠒⠂'
     local progress=".........."
-    
+
     local percent=$(((current_stage * 100) / total_stages))
 
     # Display the spinner with proper alignment
@@ -598,7 +598,7 @@ show_spinner_with_progress() {
             # Clear the line and align output properly
             # echo -ne "\r${LIGHT_CYAN}${spin:$i:1}${RESET} ${LIGHT_BLUE}[Stage $current_stage/$total_stages] ${LIGHT_PURPLE}${stage_name}${RESET}... ${LIGHT_GREEN}$percent%${RESET} completed"
             echo -ne "\r ${LIGHT_CYAN} Preparing Report ${LIGHT_CYAN}${spin:$i:2}${LIGHT_CYAN}${spin:$i:3}${LIGHT_CYAN}${spin:$i:4}${LIGHT_CYAN}${spin:$i:4}${LIGHT_CYAN} ${RESET} "
-         
+
             sleep $delay
         done
     done
@@ -642,4 +642,4 @@ generate_best_practices_reference &# Run in background
 show_spinner_with_progress $! "Generating Best Practices References" $current_stage $total_stages
 
 # Completion message
-echo -e "\n🎉 App Service configuration report generated successfully! Download the report file, name: $html_output"
+echo -e "\n🎉 App Service configuration report generated successfully! Download the report file: ${LIGHT_GREEN}$html_output ${RESET}"
