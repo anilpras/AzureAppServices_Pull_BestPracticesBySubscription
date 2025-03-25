@@ -7,6 +7,9 @@ dos2unix appservices.sh  (you may need to use this or may not be )
 
 ./appservices.sh "<pass_subscription_id>"
 
+![image](https://github.com/user-attachments/assets/be024096-88e3-420a-bbe7-05292c9601a6)
+
+
 # App Services Best Practices Script
 
 This Bash script retrieves and displays App Service and App Service Plan configurations in Azure. It provides actionable recommendations based on best practices, with a focus on optimizing settings and reducing costs. Below is an overview of the script's functionality:
