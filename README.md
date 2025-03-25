@@ -4,7 +4,7 @@
 In below example Azure Portal has been used to run the script file. Please be noted, we haven't tested this in different version of bash.
 **script link - https://github.com/anilpras/AzureAppServices_Pull_BestPracticesBySubscription/blob/main/appservices.sh **
 
-STEP#1 --> Upload the scriptfile e.g. in this case it is script.sh
+STEP#1 --> Upload the scriptfile e.g. in this case i used a file name to be **script.sh**
 
 STEP#2 --> **chmod +x script.sh**
 
