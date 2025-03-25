@@ -1,11 +1,17 @@
 
 # How to run
 
-chmod +x appservices.sh
+In below example Azure Portal has been used to run the script file. Please be noted, we haven't tested this in different version of bash.
 
-dos2unix appservices.sh  (you may need to use this or may not be )
+STEP#1 --> Upload the scriptfile e.g. in this case it is script.sh
 
-./appservices.sh "<pass_subscription_id>"
+STEP#2 --> chmod +x script.sh
+
+STEP#3 --> dos2unix script.sh  (you may need to use this or may not be )
+
+STEP#4 --> ./appservices.sh "<pass_subscription_id>"
+
+STEP#5 --> download the generated file in this case it is AppServicesRecommdentionaBeta.html
 
 ![image](https://github.com/user-attachments/assets/be024096-88e3-420a-bbe7-05292c9601a6)
 
