@@ -561,85 +561,88 @@ EOF
 # ====================================================================================
 # Region: Main Execution Flow and function calls
 #====================================================================================
+#!/bin/bash
 
-# initialize_html
-# generate_summary
-# generate_App_Services_Recommendations
-# generate_app_service_plan_recommendations
-# finalize_html
-# generate_best_practices_reference
+# # Define Colors for Output
+# GREEN="\033[1;32m"
+# YELLOW="\033[1;93m"
+# CYAN="\033[1;36m"
+# RESET="\033[0m"
 
-# echo -e "🎉 App Service configuration report generated successfully in $html_output"
+# # Function to execute a stage and suppress unwanted output
+# run_stage() {
+#     local stage_name="$1"
+#     shift
+#     local command_to_run="$@"
+
+#     echo -e "${CYAN}▶ $stage_name...${RESET}"
+    
+#     # Run the command and suppress unwanted output
+#     eval "$command_to_run" >/dev/null 2>&1
+
+#     # Check if the command was successful
+#     if [ $? -eq 0 ]; then
+#         echo -e "${GREEN}✔ $stage_name completed!${RESET}\n"
+#     else
+#         echo -e "${YELLOW}⚠ Warning: $stage_name encountered an issue!${RESET}\n"
+#     fi
+# }
+
+# # Run each stage in order
+# run_stage "Initializing HTML" initialize_html
+# run_stage "Generating Summary" generate_summary
+# run_stage "Generating App Service Recommendations" generate_App_Services_Recommendations
+# run_stage "Generating App Service Plan Recommendations" generate_app_service_plan_recommendations
+# run_stage "Finalizing HTML" finalize_html
+# run_stage "Generating Best Practices References" generate_best_practices_reference
+
+# # Completion message
+# echo -e "${YELLOW}🎉 Report generated successfully!${RESET}"
+
+
 
 # Define Colors for Output
-LIGHT_CYAN="\033[1;36m"   # Light Cyan for spinner animation
-LIGHT_BLUE="\033[1;34m"   # Light Blue for stage name
-LIGHT_PURPLE="\033[1;35m" # Light Purple for filename
-LIGHT_GREEN="\033[1;32m"  # Light Green for progress percentage
-LIGHT_YELLOW="\033[1;93m" # Light Yellow for completion status
-WHITE="\033[1;97m"        # White for other text
-RESET="\033[0m"           # Reset color
+GREEN="\033[1;32m"
+YELLOW="\033[1;93m"
+CYAN="\033[1;36m"
+RESET="\033[0m"
 
-# Function to show the spinner with progress and stage name
-show_spinner_with_progress() {
-    local pid=$1
-    local stage_name=$2
-    local current_stage=$3
-    local total_stages=$4
-    local delay=0.1
-    local spin='⠋⠙⠚⠛⠛⠓⠒⠂'
-    local progress=".........."
+# Function to execute a stage with a spinner animation
+run_stage() {
+    local stage_name="$1"
+    shift
+    local command_to_run="$@"
 
-    local percent=$(((current_stage * 100) / total_stages))
+    echo -ne "${CYAN}▶ $stage_name... ${RESET}"
 
-    # Display the spinner with proper alignment
+    # Run the command in the background
+    eval "$command_to_run" >/dev/null 2>&1 & 
+    local pid=$!
+
+    # Spinner animation while the command runs
+    local spin_chars=("⠋" "⠙" "⠚" "⠛" "⠓" "⠒" "⠂")
+    local spin_index=0
+
     while ps -p $pid &>/dev/null; do
-        for i in $(seq 0 3); do
-            # Clear the line and align output properly
-            # echo -ne "\r${LIGHT_CYAN}${spin:$i:1}${RESET} ${LIGHT_BLUE}[Stage $current_stage/$total_stages] ${LIGHT_PURPLE}${stage_name}${RESET}... ${LIGHT_GREEN}$percent%${RESET} completed"
-            echo -ne "\r ${LIGHT_CYAN} Preparing Report ${LIGHT_CYAN}${spin:$i:2}${LIGHT_CYAN}${spin:$i:3}${LIGHT_CYAN}${spin:$i:4}${LIGHT_CYAN}${spin:$i:4}${LIGHT_CYAN} ${RESET} "
-
-            sleep $delay
-        done
+        echo -ne "\r${CYAN}▶ $stage_name... ${spin_chars[$spin_index]}${RESET} "
+        spin_index=$(( (spin_index + 1) % ${#spin_chars[@]} ))
+        sleep 0.2  # Controls animation speed
     done
 
-    # Clear the line and output final completion message
-    echo -ne "\r${LIGHT_YELLOW}✔ ${WHITE}[Stage $current_stage/$total_stages] ${LIGHT_PURPLE}${stage_name}${RESET} completed! ${LIGHT_GREEN}$percent%${RESET}\n"
+    wait $pid  # Ensure the process completes
+
+    # Print completion message (overwrite previous line)
+    echo -e "\r${GREEN}✔ $stage_name completed!${RESET}   "
 }
 
-# Main execution flow with spinner and stages
-total_stages=6
-current_stage=0
-
-# Stage 1: Initialize HTML
-current_stage=$((current_stage + 1))
-initialize_html &# Run in background
-show_spinner_with_progress $! "Initializing HTML" $current_stage $total_stages
-
-# Stage 2: Generate Summary
-current_stage=$((current_stage + 1))
-generate_summary &# Run in background
-show_spinner_with_progress $! "Generating Summary" $current_stage $total_stages
-
-# Stage 3: Generate App Service Recommendations
-current_stage=$((current_stage + 1))
-generate_App_Services_Recommendations &# Run in background
-show_spinner_with_progress $! "Generating App Service Recommendations" $current_stage $total_stages
-
-# Stage 4: Generate App Service Plan Recommendations
-current_stage=$((current_stage + 1))
-generate_app_service_plan_recommendations &# Run in background
-show_spinner_with_progress $! "Generating App Service Plan Recommendations" $current_stage $total_stages
-
-# Stage 5: Finalize HTML
-current_stage=$((current_stage + 1))
-finalize_html &# Run in background
-show_spinner_with_progress $! "Finalizing HTML" $current_stage $total_stages
-
-# Stage 6: Generate Best Practices References
-current_stage=$((current_stage + 1))
-generate_best_practices_reference &# Run in background
-show_spinner_with_progress $! "Generating Best Practices References" $current_stage $total_stages
+# Run each stage in order
+run_stage "Initializing HTML" initialize_html
+run_stage "Generating Summary" generate_summary
+run_stage "Generating App Service Recommendations" generate_App_Services_Recommendations
+run_stage "Generating App Service Plan Recommendations" generate_app_service_plan_recommendations
+run_stage "Finalizing HTML" finalize_html
+run_stage "Generating Best Practices References" generate_best_practices_reference
 
 # Completion message
-echo -e "\n🎉 App Service configuration report generated successfully! Download the report file: ${LIGHT_GREEN}$html_output ${RESET}"
+echo -e "\n${YELLOW}🎉 Report generated successfully!${RESET}, $html_output"
+
