@@ -561,81 +561,32 @@ EOF
 # ====================================================================================
 # Region: Main Execution Flow and function calls
 #====================================================================================
-#!/bin/bash
 
-# # Define Colors for Output
-# GREEN="\033[1;32m"
-# YELLOW="\033[1;93m"
-# CYAN="\033[1;36m"
-# RESET="\033[0m"
-
-# # Function to execute a stage and suppress unwanted output
-# run_stage() {
-#     local stage_name="$1"
-#     shift
-#     local command_to_run="$@"
-
-#     echo -e "${CYAN}▶ $stage_name...${RESET}"
-    
-#     # Run the command and suppress unwanted output
-#     eval "$command_to_run" >/dev/null 2>&1
-
-#     # Check if the command was successful
-#     if [ $? -eq 0 ]; then
-#         echo -e "${GREEN}✔ $stage_name completed!${RESET}\n"
-#     else
-#         echo -e "${YELLOW}⚠ Warning: $stage_name encountered an issue!${RESET}\n"
-#     fi
-# }
-
-# # Run each stage in order
-# run_stage "Initializing HTML" initialize_html
-# run_stage "Generating Summary" generate_summary
-# run_stage "Generating App Service Recommendations" generate_App_Services_Recommendations
-# run_stage "Generating App Service Plan Recommendations" generate_app_service_plan_recommendations
-# run_stage "Finalizing HTML" finalize_html
-# run_stage "Generating Best Practices References" generate_best_practices_reference
-
-# # Completion message
-# echo -e "${YELLOW}🎉 Report generated successfully!${RESET}"
-
-
-
-# Define Colors for Output
 GREEN="\033[1;32m"
 YELLOW="\033[1;93m"
 CYAN="\033[1;36m"
 RESET="\033[0m"
 
-# Function to execute a stage with a spinner animation
 run_stage() {
     local stage_name="$1"
     shift
     local command_to_run="$@"
-
     echo -ne "${CYAN}▶ $stage_name... ${RESET}"
-
-    # Run the command in the background
     eval "$command_to_run" >/dev/null 2>&1 & 
     local pid=$!
 
-    # Spinner animation while the command runs
     local spin_chars=("⠋" "⠙" "⠚" "⠛" "⠓" "⠒" "⠂")
     local spin_index=0
 
     while ps -p $pid &>/dev/null; do
-        echo -ne "\r${CYAN}▶ $stage_name... ${spin_chars[$spin_index]}${RESET} "
+        echo -ne "\r${CYAN}▶ $stage_name... ${spin_chars[$spin_index]}${spin_chars[$spin_index]}${RESET}    "
         spin_index=$(( (spin_index + 1) % ${#spin_chars[@]} ))
-        sleep 0.2  # Controls animation speed
+        sleep 0.1  
     done
-
-    wait $pid  # Ensure the process completes
-
-    # Print completion message (overwrite previous line)
+    wait $pid 
     echo -e "\r${GREEN}✔ $stage_name completed!${RESET}   "
 }
 
-# Run each stage in order
 run_stage "Initializing HTML" initialize_html
 run_stage "Generating Summary" generate_summary
 run_stage "Generating App Service Recommendations" generate_App_Services_Recommendations
@@ -643,6 +594,5 @@ run_stage "Generating App Service Plan Recommendations" generate_app_service_pla
 run_stage "Finalizing HTML" finalize_html
 run_stage "Generating Best Practices References" generate_best_practices_reference
 
-# Completion message
-echo -e "\n${YELLOW}🎉 Report generated successfully!${RESET}, $html_output"
+echo -e "\n${YELLOW}🎉 Report generated successfully! Download file $html_output !! ${RESET}"
 
