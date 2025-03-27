@@ -450,8 +450,8 @@ summary_table_output() {
     cat <<EOF >>$html_output
 <tr>
     <td>$_subscriptionId</td>
-    <td>$app_service_count</td>
     <td>$app_service_plan_count</td>
+    <td>$app_service_count</td>
    </tr>
 EOF
 
@@ -587,12 +587,22 @@ run_stage() {
     echo -e "\r${GREEN}✔ $stage_name completed!${RESET}   "
 }
 
+start_time=$(date +"%Y-%m-%d %H:%M:%S")
+
 run_stage "Initializing HTML" initialize_html
 run_stage "Generating Summary" generate_summary
 run_stage "Generating App Service Recommendations" generate_App_Services_Recommendations
 run_stage "Generating App Service Plan Recommendations" generate_app_service_plan_recommendations
 run_stage "Finalizing HTML" finalize_html
 run_stage "Generating Best Practices References" generate_best_practices_reference
+end_time=$(date +"%Y-%m-%d %H:%M:%S")
 
+start_epoch=$(date -d "$start_time" +%s)
+end_epoch=$(date -d "$end_time" +%s)
+execution_time=$((end_epoch - start_epoch))
+minutes=$((execution_time / 60))
+seconds=$((execution_time % 60))
+
+echo "Total report preparation time: $minutes minutes and $seconds seconds"
 echo -e "\n${YELLOW}🎉 Report generated successfully! Download file $html_output !! ${RESET}"
 
