@@ -14,8 +14,16 @@ _subscriptionId="$1"
 
 # # Subscription ID and other variables
 
+# Ensure a subscription ID is passed
+if [ -z "$2" ]; then
+    # HTML output file
+    html_output="AppServicesRecommdentionaBeta.html"
+else
+    html_output="$2"
+fi
+
 # HTML output file
-html_output="AppServicesRecommdentionaBeta.html"
+#html_output="AppServicesRecommdentionaBeta.html"
 
 # Main Execution Flow and function calls
 
@@ -141,7 +149,7 @@ generate_app_service_plan_recommendations() {
     while IFS=$'\t' read -r name resource_group zoneEnabled; do
         webapp_count=$(az webapp list --subscription $_subscriptionId --query "[?appServicePlanId=='/subscriptions/$_subscriptionId/resourceGroups/$resource_group/providers/Microsoft.Web/serverfarms/$name'] | length(@)" -o tsv)
         az webapp list --subscription c5efbe49-8037-4fd2-881f-daf1e40b94ac --query "[?appServicePlanId=='/subscriptions/c5efbe49-8037-4fd2-881f-daf1e40b94ac/resourceGroups/PowerBIRG/providers/Microsoft.Web/serverfarms/ASP-PowerBIRG-ab69'] | length(@)"
-
+      
         webapp_info=$(az appservice plan show --name $name --subscription $_subscriptionId --resource-group $resource_group --query "{tier:sku.tier, size:sku.name, workers:sku.capacity}" --output json)
 
         webapp_worker=$(echo "$webapp_info" | jq -r '.workers')
@@ -179,7 +187,7 @@ generate_app_service_plan_recommendations() {
             if [ "$webapp_count" -gt 64 ]; then
                 webapp_count="<span style='color: #FF4C4C;font-weight: bold;'> $webapp_count ( Beyond Recommended limit )</span>"
             fi
-        elif [[ "$webapp_size" =~ ^(EP1|Y1)$ ]]; then
+        elif [[ "$webapp_size" =~ ^(EP1|EP2|EP3|Y1)$ ]]; then
             recommended_apps="N/A"
         elif [[ "$webapp_size" =~ ^(Y1)$ ]]; then
             recommended_apps="N/A"
@@ -571,7 +579,7 @@ run_stage() {
     shift
     local command_to_run="$@"
     echo -ne "${CYAN}▶ $stage_name... ${RESET}"
-    eval "$command_to_run" >/dev/null 2>&1 & 
+    eval "$command_to_run" >/dev/null 2>&1 &
     local pid=$!
 
     local spin_chars=("⠋" "⠙" "⠚" "⠛" "⠓" "⠒" "⠂")
@@ -579,10 +587,10 @@ run_stage() {
 
     while ps -p $pid &>/dev/null; do
         echo -ne "\r${CYAN}▶ $stage_name... ${spin_chars[$spin_index]}${spin_chars[$spin_index]}${RESET}    "
-        spin_index=$(( (spin_index + 1) % ${#spin_chars[@]} ))
-        sleep 0.1  
+        spin_index=$(((spin_index + 1) % ${#spin_chars[@]}))
+        sleep 0.1
     done
-    wait $pid 
+    wait $pid
     echo -e "\r${GREEN}✔ $stage_name completed!${RESET}   "
 }
 
@@ -604,4 +612,3 @@ seconds=$((execution_time % 60))
 
 echo "Total report preparation time: $minutes minutes and $seconds seconds"
 echo -e "\n${YELLOW}🎉 Report generated successfully! Download file $html_output !! ${RESET}"
-
