@@ -9,11 +9,6 @@ fi
 # Assigning the subscription ID from the first argument
 _subscriptionId="$1"
 
-# az login
-# az account set --subscription "$1"
-
-# # Subscription ID and other variables
-
 # Ensure a subscription ID is passed
 if [ -z "$2" ]; then
     # HTML output file
@@ -21,12 +16,7 @@ if [ -z "$2" ]; then
 else
     html_output="$2"
 fi
-
-# HTML output file
-#html_output="AppServicesRecommdentionaBeta.html"
-
-# Main Execution Flow and function calls
-
+ 
 # ====================================================================================
 # Region: Fetch App Services Plan Configuration to build recommendations.
 #====================================================================================
@@ -65,7 +55,7 @@ generate_App_Services_Recommendations() {
         _alwaysOn=$(echo "$config_json" | jq -r '.alwaysOn' | grep -q "^true$" && echo "ENABLED" || echo "DISABLED")
         _minTlsVersion=$(echo "$config_json" | jq -r '.minTlsVersion')
         _ftpsState=$(echo "$config_json" | jq -r '.ftpsState')
-
+ 
         # Color formatting based on conditions
         if [[ "$_autoHealEnabled" == "ENABLED" ]]; then
             autoHealColor="<span style='color: #90EE90; font-weight: bold;'> $tick $_autoHealEnabled </span>"
@@ -89,7 +79,7 @@ generate_App_Services_Recommendations() {
             _minTlsVersionStatus="$_minTlsVersion Secure"
         else
             _minTlsVersionStatus="$_minTlsVersion UNSAFE"
-        fi
+        fi 
 
         if [[ "$_minTlsVersionStatus" =~ "Secure" ]]; then
             minTlsVersionColor="<span style='color: #90EE90; font-weight: bold;'> $tick $_minTlsVersionStatus</span>"
