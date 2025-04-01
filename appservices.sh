@@ -13,7 +13,6 @@ _subscriptionId="$1"
 # az account set --subscription "$1"
 
 # # Subscription ID and other variables
-# _subscriptionId="ad265e87-5b4c-4c3c-b490-939e5907c6a5"
 
 # HTML output file
 html_output="AppServicesRecommdentionaBeta.html"
