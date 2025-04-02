@@ -16,7 +16,7 @@ if [ -z "$2" ]; then
 else
     html_output="$2"
 fi
- 
+
 # ====================================================================================
 # Region: Fetch App Services Plan Configuration to build recommendations.
 #====================================================================================
@@ -28,15 +28,33 @@ generate_App_Services_Recommendations() {
     config_reccommendation_table
 
     # Fetch web apps list
-    _webApps=$(az webapp list --subscription $_subscriptionId --query "[].{name:name, resourceGroup:resourceGroup}" --output jsonc)
+    # _webApps=$(az webapp list --subscription $_subscriptionId --query "[].{name:name, resourceGroup:resourceGroup}" --output jsonc)
+    #az resource list --subscription 'c5efbe49-8037-4fd2-881f-daf1e40b94ac' --resource-type "Microsoft.Web/sites" --query "[].{CreateTime:createdTime, Name:name, Location:location, Kind:kind, ResourceGroup:resourceGroup}" -o tsv
+    _webApps=$(az resource list --subscription $_subscriptionId --resource-type "Microsoft.Web/sites" --query "[].{CreateTime:createdTime, Name:name, Location:location, Kind:kind, ResourceGroup:resourceGroup} | sort_by(@, &Name)" --output jsonc)
+
+    # for item in $(echo "$_webApps" | jq -r '.[] | @base64'); do
+    #     _jq() {
+    #         echo ${item} | base64 --decode | jq -r ${1}
+    #     }
+
+    #     _createTime=$(_jq '.createdTime')
+    #     _name=$(_jq '.name')
+    #     _location=$(_jq '.location')
+    #     _kind=$(_jq '.kind')
+    #     _resourceGroup=$(_jq '.resourceGroup')
 
     for item in $(echo "$_webApps" | jq -r '.[] | @base64'); do
         _jq() {
-            echo ${item} | base64 --decode | jq -r ${1}
+            echo ${item} | base64 --decode | jq -r "${1}"
         }
 
-        _name=$(_jq '.name')
-        _resourceGroup=$(_jq '.resourceGroup')
+        # Extract the relevant fields using jq
+        _createTimeUnformated=$(_jq '.CreateTime' | cut -d '+' -f1)
+		_createTime=$(date -d "$_createTimeUnformated" +"%Y-%m-%dT%H:%M")
+        _name=$(_jq '.Name')
+        _location=$(_jq '.Location')
+        _kind=$(_jq '.Kind')
+        _resourceGroup=$(_jq '.ResourceGroup')
 
         # # Fetch app service configuration details
         # _autoHealEnabled=$(az webapp config show --subscription $_subscriptionId --resource-group $_resourceGroup --name $_name --query "autoHealEnabled" --output tsv | grep -q "^true$" && echo "ENABLED" || echo "DISABLED")
@@ -55,7 +73,7 @@ generate_App_Services_Recommendations() {
         _alwaysOn=$(echo "$config_json" | jq -r '.alwaysOn' | grep -q "^true$" && echo "ENABLED" || echo "DISABLED")
         _minTlsVersion=$(echo "$config_json" | jq -r '.minTlsVersion')
         _ftpsState=$(echo "$config_json" | jq -r '.ftpsState')
- 
+
         # Color formatting based on conditions
         if [[ "$_autoHealEnabled" == "ENABLED" ]]; then
             autoHealColor="<span style='color: #90EE90; font-weight: bold;'> $tick $_autoHealEnabled </span>"
@@ -79,7 +97,7 @@ generate_App_Services_Recommendations() {
             _minTlsVersionStatus="$_minTlsVersion Secure"
         else
             _minTlsVersionStatus="$_minTlsVersion UNSAFE"
-        fi 
+        fi
 
         if [[ "$_minTlsVersionStatus" =~ "Secure" ]]; then
             minTlsVersionColor="<span style='color: #90EE90; font-weight: bold;'> $tick $_minTlsVersionStatus</span>"
@@ -139,7 +157,7 @@ generate_app_service_plan_recommendations() {
     while IFS=$'\t' read -r name resource_group zoneEnabled; do
         webapp_count=$(az webapp list --subscription $_subscriptionId --query "[?appServicePlanId=='/subscriptions/$_subscriptionId/resourceGroups/$resource_group/providers/Microsoft.Web/serverfarms/$name'] | length(@)" -o tsv)
         az webapp list --subscription c5efbe49-8037-4fd2-881f-daf1e40b94ac --query "[?appServicePlanId=='/subscriptions/c5efbe49-8037-4fd2-881f-daf1e40b94ac/resourceGroups/PowerBIRG/providers/Microsoft.Web/serverfarms/ASP-PowerBIRG-ab69'] | length(@)"
-      
+
         webapp_info=$(az appservice plan show --name $name --subscription $_subscriptionId --resource-group $resource_group --query "{tier:sku.tier, size:sku.name, workers:sku.capacity}" --output json)
 
         webapp_worker=$(echo "$webapp_info" | jq -r '.workers')
@@ -195,7 +213,7 @@ generate_app_service_plan_recommendations() {
 
         # Density recommendation section if no apps in service plan
         if [ "$webapp_count" -eq 0 ]; then
-            if [[ "$webapp_size" =~ ^(Y1)$ ]]; then
+            if [[ "$webapp_size" =~ ^(EP1|EP2|EP3|Y1)$ ]]; then
                 webapp_count="N/A"
             else
                 webapp_count="<span style='color: #FF4C4C;font-weight: bold;'>Server farm: $webapp_count ( EMPTY PLAN - Review and Delete )</span>"
@@ -454,10 +472,34 @@ EOF
 
 }
 
+config_reccommendation_table() {
+
+    cat <<EOF >>$html_output
+<table>
+    <thead>
+        <tr>
+            <th>APP SERVICE NAME</th>
+            <th>RESOURCE GROUP</th>
+            <th>LOCATION</th>
+            <th>KIND</th>
+            <th>AUTO HEAL</th>
+            <th>HEALTH CHECK</th>
+            <th>ALWAYS ON</th>
+            <th>TLS Secure?</th>
+            <th>FTPs State</th>
+        </tr>
+    </thead>
+    <tbody>
+EOF
+}
+
 config_reccommendation_table_output() {
     cat <<EOF >>$html_output
 <tr>
     <td>$_name</td>
+    <td>$_resourceGroup</td>
+    <td>$_location</td>
+    <td>$_kind</td>
     <td>$autoHealColor</td>
     <td>$healthCheckColor</td>
     <td>$alwaysOnColor</td>
