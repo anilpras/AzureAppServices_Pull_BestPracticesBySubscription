@@ -10,7 +10,7 @@ STEP#2 --> **chmod +x script.sh**
 
 STEP#3 --> **dos2unix script.sh**  (you may need to use this or may not be )
 
-STEP#4 --> **./script.sh "<pass_subscription_id>"**
+STEP#4 --> **./script.sh "<pass_subscription_id>" "<0 or 1>"** // 0 - Recommended, do not generate CPU and Memory Utilizaiton
 
 STEP#5 --> download the generated file in this case it is **AppServicesRecommdentionaBeta.html**
 
