@@ -40,7 +40,6 @@ all_good_green_color='#90EE90'
 # warning_orage_color='#FF8C00'
 # all_good_green_color='#228B22'
 
-
 # Function to generate the App Services Configuration Table
 generate_App_Services_Recommendations() {
 
@@ -117,13 +116,14 @@ generate_App_Services_Recommendations() {
         shopt -s nocasematch
         if [[ "$_ftpsState" =~ "FtpsOnly" ]]; then
             _ftpsStateWithColor="<span style='color: $warning_orage_color;font-weight: bold;' title='This represents the FTPS state. Recommended setting: FTPS only or Disabled'> $tick $_ftpsState ( RECOMMENDED )</span>"
-        elif
-            [[ "$_ftpsState" =~ "AllAllowed" ]]
-        then
-            _ftpsStateWithColor="<span style='color: $error_red_color;font-weight: bold; 'title='This represents the FTPS state. Recommended setting: FTPS only or Disabled'> $critical_warning $_ftpsState ( UNSAFE )</span>"
-        else
-            _ftpsStateWithColor="<span style='color: $all_good_green_color; font-weight: bold; 'title='This represents the FTPS state. Recommended setting: FTPS only or Disabled'> $tick $_ftpsState ( RECOMMENDED )</span>"
+        fi
 
+        if [[ "$_ftpsState" =~ "AllAllowed" ]]; then
+            _ftpsStateWithColor="<span style='color: $error_red_color;font-weight: bold; 'title='This represents the FTPS state. Recommended setting: FTPS only or Disabled'> $critical_warning $_ftpsState ( UNSAFE )</span>"
+        fi
+
+        if [[ "$_ftpsState" =~ "Disabled" ]]; then
+            _ftpsStateWithColor="<span style='color: $all_good_green_color; font-weight: bold; 'title='This represents the FTPS state. Recommended setting: FTPS only or Disabled'> $tick $_ftpsState ( RECOMMENDED )</span>"
         fi
 
         # Recommendation Table - Fill the Table
@@ -135,7 +135,6 @@ generate_App_Services_Recommendations() {
     # wrap the table
     echo "</tbody></table>" >>$html_output
 }
-
 
 # Function to generate App Service Plan Recommendations
 generate_app_service_plan_recommendations() {
@@ -154,12 +153,13 @@ generate_app_service_plan_recommendations() {
 
     local _iCount=0
     while IFS=$'\t' read -r name resource_group zoneEnabled; do
-        local webapp_count=$(az webapp list --subscription $_subscriptionId --query "[?appServicePlanId=='/subscriptions/$_subscriptionId/resourceGroups/$resource_group/providers/Microsoft.Web/serverfarms/$name'] | length(@)" -o tsv)
-        local webapp_info=$(az appservice plan show --name $name --subscription $_subscriptionId --resource-group $resource_group --query "{tier:sku.tier, size:sku.name, workers:sku.capacity}" --output json)
+        # local webapp_count=$(az webapp list --subscription $_subscriptionId --query "[?appServicePlanId=='/subscriptions/$_subscriptionId/resourceGroups/$resource_group/providers/Microsoft.Web/serverfarms/$name'] | length(@)" -o tsv)
+        local webapp_info=$(az appservice plan show --name $name --subscription $_subscriptionId --resource-group $resource_group --query "{tier:sku.tier, size:sku.name, workers:sku.capacity,siteCount:properties.numberOfSites}" --output json)
 
         local webapp_worker=$(echo "$webapp_info" | jq -r '.workers')
         local webapp_size=$(echo "$webapp_info" | jq -r '.size')
         local webapp_tier=$(echo "$webapp_info" | jq -r '.tier')
+        local webapp_count=$(echo "$webapp_info" | jq -r '.siteCount')
         local _zoneEnabledColor
         local _graphCPUMemory
 
@@ -269,7 +269,6 @@ generate_summary() {
 
 }
 
-
 generate_resource_utilization_graph() {
     local __name="$1"
     local __resource_group="$2"
@@ -315,6 +314,12 @@ generate_resource_utilization_graph() {
         | select(.average != null) 
         | .average' | jq -R -s -c 'split("\n")[:-1] | map(tonumber)'
     )
+
+    # Check if CPU or Memory data is empty
+    if [[ "$__CPU_VALUES" == "[]" && "$__MEMORY_VALUES" == "[]" ]]; then
+        echo "No CPU or Memory data available. Skipping plot."
+        return 0
+    fi
 
     cat <<EOF
 <canvas id="$__canvas_id" width="378" height="250" style="border:1px solid #ccc;"></canvas>
@@ -473,7 +478,7 @@ initialize_html() {
 EOF
 }
 
-### This is light theme
+## This is light theme
 
 # initialize_html() {
 #     cat <<EOF >$html_output
@@ -484,66 +489,66 @@ EOF
 #     <title>Azure App Service Recommendations</title>
 #     <script src='https://cdn.jsdelivr.net/npm/chart.js'></script>
 #     <style>
-#         body { 
-#             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
-#             font-size: 13px; 
-#             margin: 0; 
-#             padding: 20px; 
-#             background-color: #F8F9FA; 
-#             color: #333333; 
+#         body {
+#             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+#             font-size: 13px;
+#             margin: 0;
+#             padding: 20px;
+#             background-color: #F8F9FA;
+#             color: #333333;
 #         }
 #         canvas {
-#             width: 378px; 
+#             width: 378px;
 #             height: 250px;
 #             border: 1px solid #ccc;
 #             margin-bottom: 40px;
 #             background-color: #ffffff;
 #         }
-#         h2 { 
-#             text-align: center; 
-#             color: #004085; 
-#             font-size: 22px; 
-#             font-weight: bold; 
+#         h2 {
+#             text-align: center;
+#             color: #004085;
+#             font-size: 22px;
+#             font-weight: bold;
 #         }
-#         h3 { 
-#             color: #0056b3; 
-#             font-size: 16px; 
-#             font-weight: bold; 
-#             text-align: left; 
+#         h3 {
+#             color: #0056b3;
+#             font-size: 16px;
+#             font-weight: bold;
+#             text-align: left;
 #         }
-#         p { 
-#             font-size: 13px; 
-#             color: #555555; 
-#             line-height: 1.6; 
+#         p {
+#             font-size: 13px;
+#             color: #555555;
+#             line-height: 1.6;
 #         }
-#         table { 
-#             width: 90%; 
-#             border-collapse: collapse; 
-#             margin: 20px auto; 
-#             font-size: 13px; 
+#         table {
+#             width: 90%;
+#             border-collapse: collapse;
+#             margin: 20px auto;
+#             font-size: 13px;
 #             background-color: #ffffff;
 #             box-shadow: 0 2px 4px rgba(0,0,0,0.05);
 #         }
-#         th, td { 
-#             padding: 10px; 
-#             text-align: left; 
-#             border: 1px solid #dee2e6; 
+#         th, td {
+#             padding: 10px;
+#             text-align: left;
+#             border: 1px solid #dee2e6;
 #         }
-#         th { 
-#             background-color: #e9f1f7; 
-#             color: #003366; 
-#             font-size: 14px; 
+#         th {
+#             background-color: #e9f1f7;
+#             color: #003366;
+#             font-size: 14px;
 #         }
-#         tr:nth-child(even) { 
-#             background-color: #f2f6f9; 
+#         tr:nth-child(even) {
+#             background-color: #f2f6f9;
 #         }
-#         a { 
-#             color: #007bff; 
-#             text-decoration: none; 
-#             font-weight: bold; 
+#         a {
+#             color: #007bff;
+#             text-decoration: none;
+#             font-weight: bold;
 #         }
-#         a:hover { 
-#             color: #0056b3; 
+#         a:hover {
+#             color: #0056b3;
 #         }
 #     </style>
 # </head>
