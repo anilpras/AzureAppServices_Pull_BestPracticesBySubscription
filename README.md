@@ -54,32 +54,19 @@ A Bash script to analyze and recommend best practices for Azure App Services and
 
 ---
 
-## Installation
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/anilpras/AzureAppServices_Pull_BestPracticesBySubscription.git
-   ```
-2. Upload the script file to your execution environment (e.g., Azure Portal or local system).
-3. Grant execution permissions:
-   ```bash
-   chmod +x script.sh
-   ```
-4. (Optional) Convert the file format if needed:
-   ```bash
-   dos2unix script.sh
-   ```
-
----
-
 ## Usage Instructions
-1. Run the script with the following syntax:
-   ```bash
-   ./script.sh "<subscription_id>" "<0 or 1>"
-   ```
-   - `0`: Recommended settings (does not generate CPU and Memory Utilization).
-   - `1`: Includes additional CPU and Memory Utilization details.
 
-2. Download the generated output file. The output file will be named `AppServicesRecommendationBeta.html`.
+  STEP#1 --> Upload the scriptfile e.g. in this case i used a file name to be **script.sh**
+  
+  STEP#2 --> **chmod +x script.sh**
+  
+  STEP#3 --> **dos2unix script.sh**  (you may need to use this or may not be )
+  
+  STEP#4 --> **./script.sh "<pass_subscription_id>" "<0 or 1>"** // 0 - Recommended, do not generate CPU and Memory Utilizaiton
+  
+  STEP#5 --> download the generated file in this case it is **AppServicesRecommdentionaBeta.html**
+  
+  ![image](https://github.com/user-attachments/assets/be024096-88e3-420a-bbe7-05292c9601a6)
 
 ---
 
