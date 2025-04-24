@@ -22,6 +22,9 @@ The script outputs tables that include the following information:
 
 ![image](https://github.com/user-attachments/assets/e649d4bd-81df-4a8d-9fdd-94e69ac52e56)
 
+![image](https://github.com/user-attachments/assets/80c394a4-3dad-4c9a-9316-975063c3f958)
+
+
 # App Services Best Practices Script
 
 This Bash script retrieves and displays App Service and App Service Plan configurations in Azure. It provides actionable recommendations based on best practices, with a focus on optimizing settings and reducing costs. Below is an overview of the script's functionality:
