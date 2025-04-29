@@ -86,17 +86,13 @@ The script provides outputs in HTML format, visually representing the configurat
 
 ## Script Details
 
-This Bash script is designed to retrieve and display configurations for Azure App Services and App Service Plans. Its primary focus is on identifying misconfigurations and providing actionable recommendations.
+This Bash script is designed to retrieve and display configurations for Azure App Services and App Service Plans. Its primary focus is on providing actionable recommendations based on the exisitng app services configuraitons.
 
 ### Features:
 - **Automation**: Fully automated script requiring minimal user input.
 - **Scalability**: Handles multiple App Services and App Service Plans across subscriptions.
 - **Output**: Generates an easy-to-read HTML report for analysis.
 
----
-
-## License
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
 
 ---
 
