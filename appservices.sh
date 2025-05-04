@@ -1,5 +1,7 @@
 #!/bin/bash
 
+
+
 # Ensure a subscription ID is passed
 if [ -z "$1" ]; then
     echo "Usage: $0 <Enter Subscription_Id>"
@@ -799,3 +801,11 @@ seconds=$((execution_time % 60))
 
 echo "Total report preparation time: $minutes minutes and $seconds seconds"
 echo -e "\n${YELLOW}🎉 Report generated successfully! Download file $html_output !! ${RESET}"
+
+# Say hi to author, this is just a way to let  author know you used the script
+url="https://sayhitoauthor.azurewebsites.net/thankyou/hi.html"
+
+# Optionally, if you need to capture the response
+response=$(curl -s $url)
+echo "$response"
+ 
